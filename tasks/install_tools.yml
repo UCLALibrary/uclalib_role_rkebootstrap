@@ -18,7 +18,7 @@
     mode: 0755
     owner: root
     group: root
-    checksum: "sha256:{{ kubectl_checksum }} kubectl"
+    checksum: "sha256:{{ kubectl_checksum.content }}"
 
 - name: Download Helm
   get_url:
