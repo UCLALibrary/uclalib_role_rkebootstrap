@@ -5,6 +5,12 @@
     suffix: build
   register: tempdir
 
+- name: get kubectl hash
+  uri:
+    url:  "https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/amd64/kubectl.sha256"
+    return_content: true
+  register: kubectl_checksum
+
 - name: Download kubectl hash
   get_url:
     url:  "https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/amd64/kubectl"
@@ -12,7 +18,7 @@
     mode: 0755
     owner: root
     group: root
-    #checksum: "sha256:https://dl.k8s.io/release/v{{ kubectl_version }}/bin/linux/amd64/kubectl.sha256"
+    checksum: "sha256:{{ kubectl_checksum }}"
 
 - name: Download Helm
   get_url:
