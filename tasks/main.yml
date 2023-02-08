@@ -8,4 +8,5 @@
 - name: deploy helm charts
   include_tasks: bootstrap_deploy.yml
   loop: "{{ kubeconfig_results.results }}"
-
+  environment:
+    KUBECONFIG: "{{ kubeconfig_dir  }}/kubeconfig_{{ item.item }}"
