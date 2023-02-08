@@ -1,35 +1,35 @@
 ---
-- name: "Install cert-manager helm chart on {{ item.item }}"
+- name: "Install cert-manager helm chart on cluster: {{ item.item }}"
   shell: |
     helm repo add jetstack "{{ cert_manager_repo }}"
     helm upgrade --install --version "{{ cert_manager_version }}" -n cert-manager --create-namespace cert-manager jetstack/cert-manager --set installCRDs=true
   environment:
     KUBECONFIG: "{{ kubeconfig_dir  }}/kubeconfig_{{ item.item }}"
 
-- name: "Install external secrets helm chart on {{ item.item }}"
+- name: "Install external secrets helm chart on cluster: {{ item.item }}"
   shell: |
     helm repo add external-secrets "{{ external_secrets_repo }}"
     helm upgrade --install --version "{{ external_secrets_version }}" -n external-secrets --create-namespace external-secrets external-secrets/external-secrets
   environment:
     KUBECONFIG: "{{ kubeconfig_dir  }}/kubeconfig_{{ item.item }}"
 
-- name: "Enable automatic host endpoint in Calico on {{ item.item }}"
+- name: "Enable automatic host endpoint in Calico on cluster: {{ item.item }}"
   shell: |
     kubectl patch KubeControllersConfiguration default --type=merge --patch='{"spec": {"controllers": {"node": {"hostEndpoint": {"autoCreate": "Enabled"}}}}}'
   environment:
     KUBECONFIG: "{{ kubeconfig_dir  }}/kubeconfig_{{ item.item }}"
 
-- name: "Adjust FelixConfiguration to disable fail safe inbound ports on {{ item.item }}"
+- name: "Adjust FelixConfiguration to disable fail safe inbound ports on cluster: {{ item.item }}"
   shell: |
     kubectl patch FelixConfiguration default --type=merge --patch='{"spec": {"failsafeInboundHostPorts": []}}'
   environment:
     KUBECONFIG: "{{ kubeconfig_dir  }}/kubeconfig_{{ item.item }}"
 
-- name: "Pause for 2 minute to let pods finish deploying on {{ item.item }}"
+- name: "Pause for 2 minute to let pods finish deploying on cluster: {{ item.item }}"
   pause:
     minutes: 2
 
-- name: "Install rke bootstrap helm chart on {{ item.item }}"
+- name: "Install rke bootstrap helm chart on cluster: {{ item.item }}"
   shell: |
     helm upgrade --install --version "{{ rke_bootstrap_version }}" -n uclabootstrap --create-namespace uclabootstrap /etc/ansible/files/rke_bootstrap \
     --set secrets.external_secrets.services.aws.access_key="{{ es_services_access_key }}" \
