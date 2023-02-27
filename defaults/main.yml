@@ -1,3 +1,27 @@
 ---
-kubectl_version: "1.24.9"
-helm_version: "3.11.0"
+
+kubectl_version: ""
+helm_version: ""
+
+cert_manager_version: ""
+external_secrets_version: ""
+rke_bootstrap_version: ""
+
+es_services_access_key: ""
+es_services_secret_access_key: ""
+es_systems_access_key: ""
+es_systems_secret_access_key: ""
+
+sectigo_acme_tls_key: ""
+
+rancher_token: ""
+rancher_api_url: ""
+
+kubeconfig_dir_root: "/home/ansible/.kube"
+kubeconfig_dir: "{{ kubeconfig_dir_root }}/ansible"
+
+cert_manager_repo: "https://charts.jetstack.io"
+external_secrets_repo: "https://charts.external-secrets.io"
+uclalib_cm_repo: "https://chartmuseum.library.ucla.edu"
+
+ansible_python_interpreter: "/usr/bin/python3"
