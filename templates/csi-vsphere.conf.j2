@@ -1,0 +1,9 @@
+[Global]
+cluster-id = "{{ item.item }}"
+
+[VirtualCenter "{{ vcenter_fqdn }}"]
+insecure-flag = "{{ vcenter_insecure_flag }}"
+user = "{{ vcenter_username }}"
+password = "{{ vcenter_user_password }}"
+port = "{{ vcenter_port }}"
+datacenters = "{{ vcenter_datacenter_name }}"
