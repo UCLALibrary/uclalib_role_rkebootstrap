@@ -62,9 +62,6 @@
   template: 
     src: "csi-vsphere.conf.j2"
     dest: "{{ vsphere_config_tempdir.path }}/csi-vsphere.conf"
-    owner: "root"
-    group: "root"
-    mode: "0600"
 
 - name: "CSI - Create secret resource holding vSphere CSI configuration parameters on cluster: {{ item.item }}"
   shell: |
@@ -96,9 +93,6 @@
   template:
     src: "vsphere_csi_storageclass.yml.j2"
     dest: "{{ vsphere_config_tempdir.path }}/vsphere_csi_storageclass.yml"
-    owner: "root"
-    group: "root"
-    mode: "0600"
 
 - name: "CSI - Deploy StorageClass using the vSphere Container Storage Plug-in on cluster: {{ item.item }}"
   shell: |
