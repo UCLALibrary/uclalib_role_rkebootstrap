@@ -84,7 +84,7 @@
 
 - name: "CSI - Patch vSphere Container Storage Plug-in deployment replica count on cluster: {{ item.item }}"
   shell: |
-    kubectl --namespace=vmware-system-csi patch deployment vsphere-csi-controller --type=merge --patch='{"spec":{"replicas": "{{ num_controlplane_nodes.stdout }}"}}'
+    kubectl --namespace=vmware-system-csi patch deployment vsphere-csi-controller --type=merge --patch='{"spec":{"replicas": {{ num_controlplane_nodes.stdout }}}}'
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
   when: num_controlplane_nodes.stdout != 3
