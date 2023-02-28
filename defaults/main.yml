@@ -5,6 +5,7 @@ helm_version: ""
 
 cert_manager_version: ""
 external_secrets_version: ""
+vsphere_csi_version: ""
 rke_bootstrap_version: ""
 
 es_services_access_key: ""
@@ -17,11 +18,21 @@ sectigo_acme_tls_key: ""
 rancher_token: ""
 rancher_api_url: ""
 
+vcenter_fqdn: ""
+vcenter_insecure_flag: "true"
+vcenter_datacenter_name: ""
+vcenter_username: ""
+vcenter_user_password: ""
+vcenter_port: ""
+vcenter_datastore_url: ""
+
 kubeconfig_dir_root: "/home/ansible/.kube"
 kubeconfig_dir: "{{ kubeconfig_dir_root }}/ansible"
 
 cert_manager_repo: "https://charts.jetstack.io"
 external_secrets_repo: "https://charts.external-secrets.io"
 uclalib_cm_repo: "https://chartmuseum.library.ucla.edu"
+vsphere_cpi_repo: "https://kubernetes.github.io/cloud-provider-vsphere"
+vsphere_csi_url: "https://raw.githubusercontent.com/kubernetes-sigs/vsphere-csi-driver/{{ vsphere_csi_version }}/manifests/vanilla"
 
 ansible_python_interpreter: "/usr/bin/python3"
