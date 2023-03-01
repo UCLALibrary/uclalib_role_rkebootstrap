@@ -45,9 +45,9 @@
 
 - name: "CPI - Deploy vSphere Cloud Provider Interface helm chart on cluster: {{ item.item }}"
   shell: |
-    helm repo add vsphere-cpi "{{ vsphere_cpi_repo }}"
+    helm repo add vsphere-cpi {{ vsphere_cpi_repo | quote }}
     helm repo update
-    helm upgrade --install vsphere-cpi vsphere-cpi/vsphere-cpi --namespace kube-system --set config.enabled=true --set config.vcenter="{{ vcenter_fqdn }}" --set config.username="{{ vcenter_username }}" --set config.password="{{ vcenter_user_password }}" --set config.datacenter="{{ vcenter_datacenter_name }}"
+    helm upgrade --install vsphere-cpi vsphere-cpi/vsphere-cpi --namespace kube-system --set config.enabled=true --set config.vcenter={{ vcenter_fqdn | quote }} --set config.username={{ vcenter_username | quote }} --set config.password={{ vcenter_user_password | quote }} --set config.datacenter={{ vcenter_datacenter_name | quote }}
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
   no_log: True
