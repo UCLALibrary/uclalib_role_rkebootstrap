@@ -1,5 +1,20 @@
 ---
 
+# Calico CNI Configuration
+#---------------------------------------------------------
+- name: "Enable automatic host endpoint in Calico on cluster: {{ item.item }}"
+  shell: |
+    kubectl patch KubeControllersConfiguration default --type=merge --patch='{"spec": {"controllers": {"node": {"hostEndpoint": {"autoCreate": "Enabled"}}}}}'
+  environment:
+    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
+
+- name: "Adjust FelixConfiguration to disable fail safe inbound ports on cluster: {{ item.item }}"
+  shell: |
+    kubectl patch FelixConfiguration default --type=merge --patch='{"spec": {"failsafeInboundHostPorts": []}}'
+  environment:
+    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
+#---------------------------------------------------------
+
 #  Install cert-manager
 #---------------------------------------------------------
 - name: "Install cert-manager helm chart on cluster: {{ item.item }}"
@@ -37,6 +52,10 @@
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
   no_log: True
 #---------------------------------------------------------
+
+- name: "Pause for 2 minutes to let the Cloud Provider Interface Plug-in finish deploying on cluster: {{ item.item }}"
+  pause:
+    minutes: 2
 
 # Install/Configure vSphere Container Storage Plug-in (CSI)
 #---------------------------------------------------------
@@ -112,22 +131,7 @@
     state: absent
 #---------------------------------------------------------
 
-# Calico CNI Configuration
-#---------------------------------------------------------
-- name: "Enable automatic host endpoint in Calico on cluster: {{ item.item }}"
-  shell: |
-    kubectl patch KubeControllersConfiguration default --type=merge --patch='{"spec": {"controllers": {"node": {"hostEndpoint": {"autoCreate": "Enabled"}}}}}'
-  environment:
-    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
-
-- name: "Adjust FelixConfiguration to disable fail safe inbound ports on cluster: {{ item.item }}"
-  shell: |
-    kubectl patch FelixConfiguration default --type=merge --patch='{"spec": {"failsafeInboundHostPorts": []}}'
-  environment:
-    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
-#---------------------------------------------------------
-
-- name: "Pause for 2 minute to let pods finish deploying on cluster: {{ item.item }}"
+- name: "Pause for 2 minutes to let all Pods finish deploying on cluster: {{ item.item }}"
   pause:
     minutes: 2
 
