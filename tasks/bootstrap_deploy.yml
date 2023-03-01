@@ -35,6 +35,15 @@
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
 #---------------------------------------------------------
 
+# Prep for CPI/CSI installation
+#---------------------------------------------------------
+- name: "Add node-role.kubernetes.io/control-plane label to all control plane nodes on cluster: {{ item.item }}"
+  shell: |
+    kubectl label nodes -l node-role.kubernetes.io/controlplane=true node-role.kubernetes.io/control-plane=true 
+  environment:
+    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
+#---------------------------------------------------------
+
 # Install/Configure vSphere Cloud Provider Interface (CPI)
 #---------------------------------------------------------
 - name: "CPI - Taint all nodes in the cluster: {{ item.item }}"
