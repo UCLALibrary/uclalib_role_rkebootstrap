@@ -89,6 +89,12 @@
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
   when: num_controlplane_nodes.stdout != 3
 
+- name: "CSI - Patch vSphere Container Storare Plug-in internal-feature-states ConfigMap on cluster: {{ item.item }}"
+  shell: |
+    kubectl --namespace=vmware-system-csi patch configmap internal-feature-states.csi.vsphere.vmware.com --type=merge --patch='{"data":{"improved-volume-topology": "false"}}'
+  environment:
+    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
+
 - name: "CSI - Create vSphere Container Storage Plug-in StorageClass manifest file on cluster: {{ item.item }}"
   template:
     src: "vsphere_csi_storageclass.yml.j2"
