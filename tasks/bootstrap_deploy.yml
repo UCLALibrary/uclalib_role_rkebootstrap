@@ -37,14 +37,19 @@
 
 # Prep for CPI/CSI installation
 #---------------------------------------------------------
-- name: "Add node-role.kubernetes.io/control-plane label to all control plane nodes on cluster: {{ item.item }}"
-  shell: |
-    kubectl label nodes -l node-role.kubernetes.io/controlplane=true node-role.kubernetes.io/control-plane=true 
-  environment:
-    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
+- name: "Create temp directory for storing vSphere installation and config files on cluster: {{ item.item }}"
+  tempfile:
+    state: directory
+    suffix: csibuild
+  register: vsphere_config_tempdir
+
+- name: "Clone Rancher-specific vSphere CPI/CSI charts to install on cluster: {{ item.item }}"
+  git: 
+    repo: "{{ vsphere_cpi_csi_chart_url }}"
+    dest: "{{ vsphere_config_tempdir.path }}/vsphere-charts"
 #---------------------------------------------------------
 
-# Install/Configure vSphere Cloud Provider Interface (CPI)
+# Deploy vSphere Cloud Provider Interface (CPI)
 #---------------------------------------------------------
 - name: "CPI - Taint all nodes in the cluster: {{ item.item }}"
   shell: |
@@ -52,11 +57,11 @@
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
 
-- name: "CPI - Deploy vSphere Cloud Provider Interface helm chart on cluster: {{ item.item }}"
-  shell: |
-    helm repo add vsphere-cpi {{ vsphere_cpi_repo | quote }}
-    helm repo update
-    helm upgrade --install vsphere-cpi vsphere-cpi/vsphere-cpi --namespace kube-system --set config.enabled=true --set config.vcenter={{ vcenter_fqdn | quote }} --set config.username={{ vcenter_username | quote }} --set config.password={{ vcenter_user_password | quote }} --set config.datacenter={{ vcenter_datacenter_name | quote }}
+- name: "CPI - Deploy Rancher-specific vSphere Cloud Provider Interface helm chart on cluster: {{ item.item }}"
+  shell: >
+    helm upgrade --install vsphere-cpi {{ vsphere_config_tempdir.path }}/vsphere-charts/charts/rancher-vsphere-cpi 
+    --namespace kube-system --set vCenter.host={{ vcenter_fqdn | quote }} --set vCenter.username={{ vcenter_username | quote }} 
+    --set vCenter.password={{ vcenter_user_password | quote }} --set vCenter.datacenters={{ vcenter_datacenter_name | quote }}
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
   no_log: True
@@ -66,34 +71,17 @@
   pause:
     minutes: 2
 
-# Install/Configure vSphere Container Storage Plug-in (CSI)
+# Deploy vSphere Container Storage Plug-in (CSI)
 #---------------------------------------------------------
 - name: "CSI - Create namespace resource for Container Storage Plug-in on cluster: {{ item.item }}"
   shell: |
-    kubectl apply -f "{{ vsphere_csi_url }}/namespace.yaml"
+    kubectl create namespace {{ vsphere_csi_namespace }}"
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
 
 - name: "CSI - Taint all control plane nodes on cluster: {{ item.item }}"
   shell: |
     kubectl taint nodes -l node-role.kubernetes.io/controlplane=true node-role.kubernetes.io/control-plane=:NoSchedule
-  environment:
-    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
-
-- name: "CSI - Create temp directory for storing vSphere CSI configuration file on cluster: {{ item.item }}"
-  tempfile:
-    state: directory
-    suffix: csibuild
-  register: vsphere_config_tempdir
-
-- name: "CSI - Create vSphere CSI configuration file on cluster: {{ item.item }}"
-  template: 
-    src: "csi-vsphere.conf.j2"
-    dest: "{{ vsphere_config_tempdir.path }}/csi-vsphere.conf"
-
-- name: "CSI - Create secret resource holding vSphere CSI configuration parameters on cluster: {{ item.item }}"
-  shell: |
-    kubectl create secret generic vsphere-config-secret --from-file={{ vsphere_config_tempdir.path }}/csi-vsphere.conf --namespace=vmware-system-csi
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
 
@@ -104,37 +92,28 @@
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
   register: num_controlplane_nodes
 
-- name: "CSI - Deploy vSphere Container Storage Plug-in on cluster: {{ item.item }}"
-  shell: |
-    kubectl apply -f "{{ vsphere_csi_url }}/vsphere-csi-driver.yaml"
+- name: "CSI - Deploy Rancher-specific vSphere Container Storage Interface helm chart on cluster: {{ item.item }}"
+  shell: >
+    helm upgrade --install vsphere-csi {{ vsphere_config_tempdir.path }}/vsphere-charts/charts/rancher-vsphere-csi --namespace {{ vsphere_csi_namespace }} 
+    --set vCenter.host={{ vcenter_fqdn | quote }} --set vCenter.clusterId={{ item.item }} --set vCenter.datacenters={{ vcenter_datacenter_name | quote }} 
+    --set vCenter.username={{ vcenter_username | quote }} --set vCenter.password={{ vcenter_user_password | quote }}
+    --set storageClass.datastoreURL={{ vcenter_datastore_url | quote }} --set storageClass.storagePolicyName={{ vcenter_storage_policy_name | quote }} 
+    --set storageClass.allowVolumeExpansion={{ vcenter_vol_expansion }}
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
+  no_log: True
 
 - name: "CSI - Patch vSphere Container Storage Plug-in deployment replica count on cluster: {{ item.item }}"
   shell: |
-    kubectl --namespace=vmware-system-csi patch deployment vsphere-csi-controller --type=merge --patch='{"spec":{"replicas": {{ num_controlplane_nodes.stdout }}}}'
+    kubectl --namespace {{ vsphere_csi_namespace }} patch deployment vsphere-csi-controller --type=merge --patch='{"spec":{"replicas": {{ num_controlplane_nodes.stdout }}}}'
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
   when: num_controlplane_nodes.stdout != 3
+#---------------------------------------------------------
 
-- name: "CSI - Patch vSphere Container Storare Plug-in internal-feature-states ConfigMap on cluster: {{ item.item }}"
-  shell: |
-    kubectl --namespace=vmware-system-csi patch configmap internal-feature-states.csi.vsphere.vmware.com --type=merge --patch='{"data":{"improved-volume-topology": "false"}}'
-  environment:
-    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
-
-- name: "CSI - Create vSphere Container Storage Plug-in StorageClass manifest file on cluster: {{ item.item }}"
-  template:
-    src: "vsphere_csi_storageclass.yml.j2"
-    dest: "{{ vsphere_config_tempdir.path }}/vsphere_csi_storageclass.yml"
-
-- name: "CSI - Deploy StorageClass using the vSphere Container Storage Plug-in on cluster: {{ item.item }}"
-  shell: |
-    kubectl apply -f "{{ vsphere_config_tempdir.path }}/vsphere_csi_storageclass.yml"
-  environment:
-    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
-
-- name: "CSI - Remove the vSphere CSI configuration temp directory on cluster: {{ item.item }}"
+# Clean-up for CPI/CSI installation
+#---------------------------------------------------------
+- name: "Remove temp directory for storing vSphere installation and config files on cluster: {{ item.item }}"
   file:
     path: "{{ vsphere_config_tempdir.path }}"
     state: absent
