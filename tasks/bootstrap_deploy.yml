@@ -97,8 +97,7 @@
     helm upgrade --install vsphere-csi {{ vsphere_config_tempdir.path }}/vsphere-charts/charts/rancher-vsphere-csi --namespace {{ vsphere_csi_namespace }} 
     --set vCenter.host={{ vcenter_fqdn | quote }} --set vCenter.clusterId={{ item.item }} --set vCenter.datacenters={{ vcenter_datacenter_name | quote }} 
     --set vCenter.username={{ vcenter_username | quote }} --set vCenter.password={{ vcenter_user_password | quote }}
-    --set storageClass.datastoreURL={{ vcenter_datastore_url | quote }} --set storageClass.storagePolicyName={{ vcenter_storage_policy_name | quote }} 
-    --set storageClass.allowVolumeExpansion={{ vcenter_vol_expansion }}
+    --set storageClass.datastoreURL={{ vcenter_datastore_url | quote }} --set storageClass.allowVolumeExpansion={{ vcenter_vol_expansion }}
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
   no_log: True

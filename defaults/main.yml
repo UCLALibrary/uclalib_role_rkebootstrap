@@ -24,7 +24,6 @@ vcenter_username: ""
 vcenter_user_password: ""
 vcenter_port: ""
 vcenter_datastore_url: ""
-vcenter_storage_policy_name: "vsphere-csi-sc"
 vcenter_vol_expansion: "true"
 
 kubeconfig_dir_root: "/home/ansible/.kube"
