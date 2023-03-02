@@ -75,7 +75,7 @@
 #---------------------------------------------------------
 - name: "CSI - Create namespace resource for Container Storage Plug-in on cluster: {{ item.item }}"
   shell: |
-    kubectl create namespace {{ vsphere_csi_namespace }}"
+    kubectl create namespace {{ vsphere_csi_namespace }}
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
 
