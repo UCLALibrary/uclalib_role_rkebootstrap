@@ -73,9 +73,14 @@
 
 # Deploy vSphere Container Storage Plug-in (CSI)
 #---------------------------------------------------------
+- name: "CSI - Save template file to create CSI namespace on cluster: {{ item.item }}"
+  template:
+    src: "vsphere_csi_namespace.yml.j2"
+    dest: "{{ vsphere_config_tempdir.path }}/vsphere_csi_namespace.yml"
+
 - name: "CSI - Create namespace resource for Container Storage Plug-in on cluster: {{ item.item }}"
   shell: |
-    kubectl create namespace {{ vsphere_csi_namespace }}
+    kubectl apply -f {{ vsphere_config_tempdir.path }}/vsphere_csi_namespace.yml
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
 
