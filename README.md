@@ -1,38 +1,56 @@
-Role Name
+uclalib_role_rkebootstrap
 =========
 
-A brief description of the role goes here.
+This role is meant to be run against a UCLA Library provisioned Rancher RKE cluster to bootstrap initial components.
+
+Cluster components this roles installs/configures:
+  * cert-manager operator
+  * external-secrets operator
+  * calico container network interface configurations and global policies customizations
+  * vsphere cloud provider interface and container storage interface plug-ins 
+
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+You must have a Rancher RKE cluster provisioned using the UCLA Library's templates in vSphere.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+### Variables you must define (that do not have defaults):
 
-Dependencies
-------------
+To connect to the Rancher Manager, you must have the following variables defined:
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+  * `rancher_token`
+  * `rancher_api_url`
 
-Example Playbook
-----------------
+To connect to the vCenter environment, you must have the following variables defined:
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+  * `vcenter_fqdn`
+  * `vcenter_insecure_flag`
+  * `vcenter_datacenter_name`
+  * `vcenter_username`
+  * `vcenter_user_password`
+  * `vcenter_port`
+  * `vcenter_datastore_url`
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+Specifiy package versions:
 
-License
--------
+  * `kubectl_version`
+  * `helm_version`
+  * `cert_manager_version`
+  * `external_secrets_version`
+  * `rke_bootstrap_version`
 
-BSD
+Specifiy external secret AWS access credentials for each secret domain:
 
-Author Information
-------------------
+  * `es_services_access_key`
+  * `es_services_secret_access_key`
+  * `es_systems_access_key`
+  * `es_systems_secret_access_key`
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Specify access information to our Sectigo ACME provider:
+
+  * `sectigo_acme_tls_key`
+
