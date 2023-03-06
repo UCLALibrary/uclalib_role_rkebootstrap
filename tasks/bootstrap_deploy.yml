@@ -73,17 +73,6 @@
 
 # Deploy vSphere Container Storage Plug-in (CSI)
 #---------------------------------------------------------
-- name: "CSI - Save template file to create CSI namespace on cluster: {{ item.item }}"
-  template:
-    src: "vsphere_csi_namespace.yml.j2"
-    dest: "{{ vsphere_config_tempdir.path }}/vsphere_csi_namespace.yml"
-
-- name: "CSI - Create namespace resource for Container Storage Plug-in on cluster: {{ item.item }}"
-  shell: |
-    kubectl apply -f {{ vsphere_config_tempdir.path }}/vsphere_csi_namespace.yml
-  environment:
-    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
-
 - name: "CSI - Taint all control plane nodes on cluster: {{ item.item }}"
   shell: |
     kubectl taint nodes -l node-role.kubernetes.io/controlplane=true node-role.kubernetes.io/control-plane=:NoSchedule
@@ -99,7 +88,7 @@
 
 - name: "CSI - Deploy Rancher-specific vSphere Container Storage Interface helm chart on cluster: {{ item.item }}"
   shell: >
-    helm upgrade --install vsphere-csi {{ vsphere_config_tempdir.path }}/vsphere-charts/charts/rancher-vsphere-csi --namespace {{ vsphere_csi_namespace }} 
+    helm upgrade --install vsphere-csi {{ vsphere_config_tempdir.path }}/vsphere-charts/charts/rancher-vsphere-csi --namespace {{ vsphere_csi_namespace }} --create-namespace
     --set vCenter.host={{ vcenter_fqdn | quote }} --set vCenter.clusterId={{ item.item }} --set vCenter.datacenters={{ vcenter_datacenter_name | quote }} 
     --set vCenter.username={{ vcenter_username | quote }} --set vCenter.password={{ vcenter_user_password | quote }}
     --set storageClass.datastoreURL={{ vcenter_datastore_url | quote }} --set storageClass.allowVolumeExpansion={{ vcenter_vol_expansion }}
