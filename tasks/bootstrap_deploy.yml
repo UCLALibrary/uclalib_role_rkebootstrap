@@ -73,12 +73,6 @@
 
 # Deploy vSphere Container Storage Plug-in (CSI)
 #---------------------------------------------------------
-- name: "CSI - Taint all control plane nodes on cluster: {{ item.item }}"
-  shell: |
-    kubectl taint nodes -l node-role.kubernetes.io/controlplane=true node-role.kubernetes.io/control-plane=:NoSchedule --overwrite
-  environment:
-    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
-
 - name: "CSI - Get number of control plane nodes in cluster on cluster: {{ item.item }}"
   shell: |
     kubectl get nodes -l node-role.kubernetes.io/controlplane=true -o name | wc -l
