@@ -1,4 +1,4 @@
-uclalib_role_rkebootstrap
+uclalib_role_rkebootstrap_targeted
 =========
 
 This role is meant to be run against a UCLA Library provisioned Rancher RKE cluster to bootstrap initial components.
@@ -6,9 +6,10 @@ This role is meant to be run against a UCLA Library provisioned Rancher RKE clus
 Cluster components this roles installs/configures:
   * cert-manager operator
   * external-secrets operator
+  * MetalLB operator
+  * Ingress NGINX Controller
   * calico container network interface configurations and global policies customizations
   * vsphere cloud provider interface and container storage interface plug-ins 
-
 
 Requirements
 ------------
