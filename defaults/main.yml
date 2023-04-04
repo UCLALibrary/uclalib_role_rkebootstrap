@@ -39,3 +39,5 @@ vsphere_cpi_csi_chart_url: "https://github.com/rancher/vsphere-charts"
 vsphere_csi_namespace: "vmware-system-csi"
 
 ansible_python_interpreter: "/usr/bin/python3"
+
+metallb_cluster_nat_ip_json_file: "/etc/ansible/files/metallb/cluster_nat_ips.json"

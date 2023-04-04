@@ -122,6 +122,12 @@
 
 # Install RKE Bootstrap Helm Chart
 #---------------------------------------------------------
+- name: Get assigned MetalLB Load Balancer IP address
+  set_fact:
+    loadbalancer_ip: "{{ lookup('file', '{{ metallb_cluster_nat_ip_json_file }}') | json_query(ip_query) }}"
+  vars:
+    ip_query: "clusters[?id=='{{ item.item }}'].ip"
+
 - name: "Install rke bootstrap helm chart on cluster: {{ item.item }}"
   shell: |
     helm upgrade --install --version "{{ rke_bootstrap_version }}" -n uclabootstrap --create-namespace uclabootstrap /etc/ansible/files/rke_bootstrap \
