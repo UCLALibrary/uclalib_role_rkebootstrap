@@ -35,6 +35,16 @@
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
 #---------------------------------------------------------
 
+# Install MetalLB
+#---------------------------------------------------------
+- name: "Install MetalLB helm chart on cluster: {{ item.item }}"
+  shell: |
+    helm repo add metallb "{{ metallb_repo }}"
+    helm upgrade --install metallb metallb/metallb --namespace metallb-system --create-namespace
+  environment:
+    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
+#---------------------------------------------------------
+
 # Prep for CPI/CSI installation
 #---------------------------------------------------------
 - name: "Create temp directory for storing vSphere installation and config files on cluster: {{ item.item }}"
@@ -67,9 +77,9 @@
   no_log: True
 #---------------------------------------------------------
 
-- name: "Pause for 2 minutes to let the Cloud Provider Interface Plug-in finish deploying on cluster: {{ item.item }}"
+- name: "Pause for 1 minute to let the Cloud Provider Interface Plug-in finish deploying on cluster: {{ item.item }}"
   pause:
-    minutes: 2
+    minutes: 1
 
 # Deploy vSphere Container Storage Plug-in (CSI)
 #---------------------------------------------------------
@@ -106,10 +116,12 @@
     state: absent
 #---------------------------------------------------------
 
-- name: "Pause for 2 minutes to let all Pods finish deploying on cluster: {{ item.item }}"
+- name: "Pause for 1 minute to let all Pods finish deploying on cluster: {{ item.item }}"
   pause:
-    minutes: 2
+    minutes: 1
 
+# Install RKE Bootstrap Helm Chart
+#---------------------------------------------------------
 - name: "Install rke bootstrap helm chart on cluster: {{ item.item }}"
   shell: |
     helm upgrade --install --version "{{ rke_bootstrap_version }}" -n uclabootstrap --create-namespace uclabootstrap /etc/ansible/files/rke_bootstrap \
@@ -119,6 +131,21 @@
     --set secrets.external_secrets.systems.aws.secret_access_key="{{ es_systems_secret_access_key }}" \
     --set secrets.cert_manager.external.sectigo_acme.email="{{ sectigo_acme_email }}" \
     --set secrets.cert_manager.external.sectigo_acme.tls_key="{{ sectigo_acme_tls_key }}"
+    --set metallb.ipaddresspool.poolname="{{ item.item }}-pool"
+    --set metallb.ipaddresspool.ipaddress="{{ loadbalancer_ip }}"
+    --set metallb.l2advertisement.advname="{{ item.item }}-adv"
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
   no_log: True
+#---------------------------------------------------------
+
+# Install Ingress Nginx
+#---------------------------------------------------------
+- name: "Install Ingress Nginx helm chart on cluster: {{ item.item }}"
+  shell: >
+    helm repo add ingress-nginx "{{ ingress_nginx_repo }}"
+    helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace 
+    --set 'controller.ingressClassResource.default=true'
+  environment:
+    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
+#---------------------------------------------------------

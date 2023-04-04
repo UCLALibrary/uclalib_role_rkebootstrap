@@ -1,10 +1,7 @@
 ---
-- name: install tools
-  include_tasks: install_tools.yml
+- include_tasks: install_deploy_tools.yml
 
-- name: download kubeconfigs
-  include_tasks: download_kubeconfigs.yml
+- include_tasks: download_cluster_kubeconfigs.yml
 
-- name: deploy helm charts
-  include_tasks: bootstrap_deploy.yml
+- include_tasks: rke_cluster_bootstrap.yml
   loop: "{{ kubeconfig_results.results }}"
