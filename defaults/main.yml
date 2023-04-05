@@ -31,9 +31,13 @@ kubeconfig_dir: "{{ kubeconfig_dir_root }}/ansible"
 
 cert_manager_repo: "https://charts.jetstack.io"
 external_secrets_repo: "https://charts.external-secrets.io"
+metallb_repo: "https://metallb.github.io/metallb"
+ingress_nginx_repo: "https://kubernetes.github.io/ingress-nginx"
 uclalib_cm_repo: "https://chartmuseum.library.ucla.edu"
 vsphere_cpi_csi_chart_url: "https://github.com/rancher/vsphere-charts"
 
 vsphere_csi_namespace: "vmware-system-csi"
 
 ansible_python_interpreter: "/usr/bin/python3"
+
+metallb_cluster_nat_ip_json_file: ""
