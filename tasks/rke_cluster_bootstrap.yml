@@ -124,7 +124,7 @@
 #---------------------------------------------------------
 - name: Get assigned MetalLB Load Balancer IP address
   set_fact:
-    loadbalancer_ip: "{{ lookup('file', '{{ metallb_cluster_nat_ip_json_file }}') | json_query(ip_query) }}"
+    loadbalancer_ip: "{{ lookup('file', '{{ metallb_cluster_nat_ip_json_file }}') | from_json | json_query(ip_query) | join }}"
   vars:
     ip_query: "clusters[?id=='{{ item.item }}'].ip"
 
