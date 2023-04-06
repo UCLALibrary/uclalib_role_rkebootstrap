@@ -129,13 +129,13 @@
     ip_query: "clusters[?id=='{{ item.item }}'].ip"
 
 - name: "Install rke bootstrap helm chart on cluster: {{ item.item }}"
-  shell: |
-    helm upgrade --install --version "{{ rke_bootstrap_version }}" -n uclabootstrap --create-namespace uclabootstrap /etc/ansible/files/rancher/rke_bootstrap \
-    --set secrets.external_secrets.services.aws.access_key="{{ es_services_access_key }}" \
-    --set secrets.external_secrets.services.aws.secret_access_key="{{ es_services_secret_access_key }}" \
-    --set secrets.external_secrets.systems.aws.access_key="{{ es_systems_access_key }}" \
-    --set secrets.external_secrets.systems.aws.secret_access_key="{{ es_systems_secret_access_key }}" \
-    --set secrets.cert_manager.external.sectigo_acme.email="{{ sectigo_acme_email }}" \
+  shell: >
+    helm upgrade --install --version "{{ rke_bootstrap_version }}" -n uclabootstrap --create-namespace uclabootstrap /etc/ansible/files/rancher/rke_bootstrap
+    --set secrets.external_secrets.services.aws.access_key="{{ es_services_access_key }}"
+    --set secrets.external_secrets.services.aws.secret_access_key="{{ es_services_secret_access_key }}"
+    --set secrets.external_secrets.systems.aws.access_key="{{ es_systems_access_key }}"
+    --set secrets.external_secrets.systems.aws.secret_access_key="{{ es_systems_secret_access_key }}"
+    --set secrets.cert_manager.external.sectigo_acme.email="{{ sectigo_acme_email }}"
     --set secrets.cert_manager.external.sectigo_acme.tls_key="{{ sectigo_acme_tls_key }}"
     --set metallb.ipaddresspool.poolname="{{ item.item }}-pool"
     --set metallb.ipaddresspool.ipaddress="{{ loadbalancer_ip }}/32"
