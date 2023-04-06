@@ -1,5 +1,7 @@
 ---
 
+disable_log_msg: "True"
+
 kubectl_version: ""
 helm_version: ""
 
