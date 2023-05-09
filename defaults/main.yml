@@ -43,3 +43,5 @@ vsphere_csi_namespace: "vmware-system-csi"
 ansible_python_interpreter: "/usr/bin/python3"
 
 metallb_cluster_nat_ip_json_file: ""
+
+argocd_svc_account_id: ""

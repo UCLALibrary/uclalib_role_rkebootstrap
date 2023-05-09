@@ -108,14 +108,6 @@
   when: num_controlplane_nodes.stdout != 3
 #---------------------------------------------------------
 
-# Clean-up for CPI/CSI installation
-#---------------------------------------------------------
-- name: "Remove temp directory for storing vSphere installation and config files on cluster: {{ item.item }}"
-  file:
-    path: "{{ vsphere_config_tempdir.path }}"
-    state: absent
-#---------------------------------------------------------
-
 - name: "Pause for 1 minute to let all Pods finish deploying on cluster: {{ item.item }}"
   pause:
     minutes: 1
@@ -153,4 +145,68 @@
     helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace --set 'controller.ingressClassResource.default=true'
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
+#---------------------------------------------------------
+
+# Register Cluster in ArgoCD
+#---------------------------------------------------------
+- name: "Add Rancher ArgoCD Service Account User as a member of cluster {{ item.item }}"
+  uri:
+    url: "{{ rancher_api_url }}/v3/clusterroletemplatebindings"
+    method: POST
+    validate_certs: false
+    return_content: true
+    status_code: 201
+    body_format: json
+    body:
+      type: "clusterRoleTemplateBinding"
+      clusterId: "{{ item.item }}"
+      roleTemplateId: "cluster-member"
+      userPrincipalId: "local://{{ argocd_svc_account_id }}"
+    headers:
+      Authorization: "Bearer {{ rancher_token }}"
+
+- name: "Get name of cluster {{ item.item }}"
+  shell: >
+    kubectl config current-context
+  environment:
+    KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
+  register: kube_current_context
+
+- name: "Set cluster {{ item.item }} server endpoint URL"
+  set_fact:
+    cluster_server_url_endpoint: "{{ rancher_api_url }}/k8s/clusters/{{ item.item }}"
+
+- name: "Create temp storage area on ArgoCD cluster host"
+  tempfile:
+    state: directory
+    suffix: "_argocd_cluster_reg"
+  register: argocd_config_tempdir
+  delegate_to: "{{ argocd_k3s_host }}"
+
+- name: "Generate Secret manifest file for {{ item.item }} registration into ArgoCD"
+  template: 
+    src: "argocd_cluster_secret.j2"
+    dest: "{{ argocd_config_tempdir.path }}/argocd_cluster_secret.yaml"
+  delegate_to: "{{ argocd_k3s_host }}"
+
+- name: "Create {{ item.item }} Secret resource in ArgoCD cluster"
+  shell: >
+    kubectl -n argocd apply -f {{ argocd_config_tempdir.path }}/argocd_cluster_secret.yaml
+  environment:
+    KUBECONFIG: "{{ argocd_k3s_kubeconfig }}"
+  delegate_to: "{{ argocd_k3s_host }}"
+#---------------------------------------------------------
+
+# Clean-up for temp directory installation
+#---------------------------------------------------------
+- name: "Remove temp directory for storing vSphere installation and config files on cluster: {{ item.item }}"
+  file:
+    path: "{{ vsphere_config_tempdir.path }}"
+    state: absent
+
+- name: "Remove temp directory for storing ArgoCD manifest files"
+  file:
+    path: "{{ argocd_config_tempdir.path }}"
+    state: absent 
+  delegate_to: "{{ argocd_k3s_host }}"
 #---------------------------------------------------------
