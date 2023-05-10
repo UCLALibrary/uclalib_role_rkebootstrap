@@ -149,7 +149,18 @@
 
 # Register Cluster in ArgoCD
 #---------------------------------------------------------
-- name: "Add Rancher ArgoCD Service Account User as a member of cluster {{ item.item }}"
+- name: "Get Cluster Role Template Binding for User {{ argocd_svc_account_id }} in cluster {{ item.item }}"
+  uri:
+    url: "{{ rancher_api_url }}/v3/clusters/{{ item.item }}/clusterroletemplatebindings?userId={{ argocd_svc_account_id }}"
+    method: GET
+    validate_certs: false
+    return_content: true
+    status_code: 200
+    headers:
+      Authorization: "Bearer {{ rancher_token }}"
+  register: clusterroletemplatebindings_result
+
+- name: "Add Rancher ArgoCD Service Account User {{ argocd_svc_account_id }} as a member of cluster {{ item.item }}"
   uri:
     url: "{{ rancher_api_url }}/v3/clusterroletemplatebindings"
     method: POST
@@ -164,6 +175,7 @@
       userPrincipalId: "local://{{ argocd_svc_account_id }}"
     headers:
       Authorization: "Bearer {{ rancher_token }}"
+  when: not clusterroletemplatebindings_result.json.data
 
 - name: "Get name of cluster {{ item.item }}"
   shell: >
