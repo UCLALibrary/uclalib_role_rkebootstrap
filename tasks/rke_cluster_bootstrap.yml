@@ -114,11 +114,11 @@
 
 # Install RKE Bootstrap Helm Chart
 #---------------------------------------------------------
-- name: Get assigned MetalLB Load Balancer IP address
+- name: "Get MetalLB Load Balancer IP address for cluster {{ item.item }}"
   set_fact:
-    loadbalancer_ip: "{{ lookup('file', '{{ metallb_cluster_nat_ip_json_file }}') | from_json | json_query(ip_query) | join }}"
+    loadbalancer_ip: "{{ clusters_output.json | json_query(ip_query) | join }}"
   vars:
-    ip_query: "clusters[?id=='{{ item.item }}'].ip"
+    ip_query: "data[?id=='{{ item.item }}'].labels.metallbip"
 
 - name: "Install rke bootstrap helm chart on cluster: {{ item.item }}"
   shell: >
