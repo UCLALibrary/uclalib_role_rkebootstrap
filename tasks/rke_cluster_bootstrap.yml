@@ -194,12 +194,14 @@
     suffix: "_argocd_cluster_reg"
   register: argocd_config_tempdir
   delegate_to: "{{ argocd_k3s_host }}"
+  connection: ssh
 
 - name: "Generate Secret manifest file for {{ item.item }} registration into ArgoCD"
   template: 
     src: "argocd_cluster_secret.j2"
     dest: "{{ argocd_config_tempdir.path }}/argocd_cluster_secret.yaml"
   delegate_to: "{{ argocd_k3s_host }}"
+  connection: ssh
 
 - name: "Create {{ item.item }} Secret resource in ArgoCD cluster"
   shell: >
@@ -207,6 +209,7 @@
   environment:
     KUBECONFIG: "{{ argocd_k3s_kubeconfig }}"
   delegate_to: "{{ argocd_k3s_host }}"
+  connection: ssh
 #---------------------------------------------------------
 
 # Clean-up for temp directory installation
@@ -221,4 +224,5 @@
     path: "{{ argocd_config_tempdir.path }}"
     state: absent 
   delegate_to: "{{ argocd_k3s_host }}"
+  connection: ssh
 #---------------------------------------------------------
