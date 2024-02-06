@@ -144,7 +144,7 @@
 - name: "Install Ingress Nginx helm chart on cluster: {{ item.item }}"
   shell: |
     helm repo add ingress-nginx "{{ ingress_nginx_repo }}"
-    helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace --set 'controller.ingressClassResource.default=true'
+    helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace --set 'controller.ingressClassResource.default=true' --set 'controller.service.externalTrafficPolicy=Local'
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
 #---------------------------------------------------------
