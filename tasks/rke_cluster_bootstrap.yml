@@ -40,7 +40,7 @@
 - name: "Install MetalLB helm chart on cluster: {{ item.item }}"
   shell: |
     helm repo add metallb "{{ metallb_repo }}"
-    helm upgrade --install metallb metallb/metallb --namespace metallb-system --create-namespace
+    helm upgrade --install --version "{{ metallb_version }}" metallb metallb/metallb --namespace metallb-system --create-namespace
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
 #---------------------------------------------------------
@@ -69,7 +69,7 @@
 
 - name: "CPI - Deploy Rancher-specific vSphere Cloud Provider Interface helm chart on cluster: {{ item.item }}"
   shell: >
-    helm upgrade --install vsphere-cpi {{ vsphere_config_tempdir.path }}/vsphere-charts/charts/rancher-vsphere-cpi 
+    helm upgrade --install --version "{{ vsphere_cpi_version }}" vsphere-cpi {{ vsphere_config_tempdir.path }}/vsphere-charts/charts/rancher-vsphere-cpi 
     --namespace kube-system --set vCenter.host={{ vcenter_fqdn | quote }} --set vCenter.username={{ vcenter_username | quote }} 
     --set vCenter.password={{ vcenter_user_password | quote }} --set vCenter.datacenters={{ vcenter_datacenter_name | quote }}
   environment:
@@ -92,7 +92,7 @@
 
 - name: "CSI - Deploy Rancher-specific vSphere Container Storage Interface helm chart on cluster: {{ item.item }}"
   shell: >
-    helm upgrade --install vsphere-csi {{ vsphere_config_tempdir.path }}/vsphere-charts/charts/rancher-vsphere-csi --namespace {{ vsphere_csi_namespace }} --create-namespace
+    helm upgrade --install --version "{{ vsphere_csi_version }}" vsphere-csi {{ vsphere_config_tempdir.path }}/vsphere-charts/charts/rancher-vsphere-csi --namespace {{ vsphere_csi_namespace }} --create-namespace
     --set vCenter.host={{ vcenter_fqdn | quote }} --set vCenter.clusterId={{ item.item }} --set vCenter.datacenters={{ vcenter_datacenter_name | quote }} 
     --set vCenter.username={{ vcenter_username | quote }} --set vCenter.password={{ vcenter_user_password | quote }}
     --set storageClass.datastoreURL={{ vcenter_datastore_url | quote }} --set storageClass.allowVolumeExpansion={{ vcenter_vol_expansion }}
@@ -142,9 +142,10 @@
 # Install Ingress Nginx
 #---------------------------------------------------------
 - name: "Install Ingress Nginx helm chart on cluster: {{ item.item }}"
-  shell: |
-    helm repo add ingress-nginx "{{ ingress_nginx_repo }}"
-    helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace --set 'controller.ingressClassResource.default=true' --set 'controller.service.externalTrafficPolicy=Local'
+  shell: > 
+    helm repo add ingress-nginx "{{ ingress_nginx_repo }}" ; 
+    helm upgrade --install --version "{{ ingress_nginx_version }}" ingress-nginx ingress-nginx/ingress-nginx 
+    --namespace ingress-nginx --create-namespace --set 'controller.ingressClassResource.default=true' --set 'controller.service.externalTrafficPolicy=Local'
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
 #---------------------------------------------------------
