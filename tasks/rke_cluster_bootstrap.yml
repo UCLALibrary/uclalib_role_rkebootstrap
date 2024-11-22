@@ -20,6 +20,7 @@
 - name: "Install cert-manager helm chart on cluster: {{ item.item }}"
   shell: |
     helm repo add jetstack "{{ cert_manager_repo }}"
+    helm repo update jetstack
     helm upgrade --install --version "{{ cert_manager_version }}" -n cert-manager --create-namespace cert-manager jetstack/cert-manager --set installCRDs=true
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
@@ -30,6 +31,7 @@
 - name: "Install external secrets helm chart on cluster: {{ item.item }}"
   shell: |
     helm repo add external-secrets "{{ external_secrets_repo }}"
+    helm repo update external-secrets
     helm upgrade --install --version "{{ external_secrets_version }}" -n external-secrets --create-namespace external-secrets external-secrets/external-secrets
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
@@ -40,6 +42,7 @@
 - name: "Install MetalLB helm chart on cluster: {{ item.item }}"
   shell: |
     helm repo add metallb "{{ metallb_repo }}"
+    helm repo update metallb
     helm upgrade --install --version "{{ metallb_version }}" metallb metallb/metallb --namespace metallb-system --create-namespace
   environment:
     KUBECONFIG: "{{ kubeconfig_dir }}/kubeconfig_{{ item.item }}"
@@ -144,6 +147,7 @@
 - name: "Install Ingress Nginx helm chart on cluster: {{ item.item }}"
   shell: > 
     helm repo add ingress-nginx "{{ ingress_nginx_repo }}" ; 
+    helm repo update ingress-nginx
     helm upgrade --install --version "{{ ingress_nginx_version }}" ingress-nginx ingress-nginx/ingress-nginx 
     --namespace ingress-nginx --create-namespace --set 'controller.ingressClassResource.default=true' --set 'controller.service.externalTrafficPolicy=Local'
   environment:
