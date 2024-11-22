@@ -19,6 +19,7 @@
     owner: root
     group: root
     checksum: "sha256:{{ kubectl_checksum.content }}"
+    become: true
 
 - name: Download Helm
   get_url:
@@ -39,6 +40,7 @@
     mode: 0755
     owner: root
     group: root
+    become: true
 
 - name: Use the registered var and the file module to remove the temporary file
   ansible.builtin.file:
