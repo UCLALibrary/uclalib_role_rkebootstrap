@@ -132,6 +132,8 @@
     --set secrets.external_secrets.systems.aws.secret_access_key="{{ es_systems_secret_access_key }}"
     --set secrets.external_secrets.apps.aws.access_key="{{ es_apps_access_key }}"
     --set secrets.external_secrets.apps.aws.secret_access_key="{{ es_apps_secret_access_key }}"
+    --set secrets.external_secrets.devsupport.aws.access_key="{{ es_devsupport_access_key }}"
+    --set secrets.external_secrets.devsupport.aws.secret_access_key="{{ es_devsupport_secret_access_key }}"
     --set secrets.cert_manager.external.sectigo_acme.email="{{ sectigo_acme_email }}"
     --set secrets.cert_manager.external.sectigo_acme.tls_key="{{ sectigo_acme_tls_key }}"
     --set metallb.ipaddresspool.poolname="{{ item.item }}-pool"
